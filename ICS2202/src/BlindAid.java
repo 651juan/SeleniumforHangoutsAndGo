@@ -1,8 +1,12 @@
+import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import javax.swing.*;
 import java.awt.*;
@@ -17,7 +21,6 @@ public class BlindAid extends JFrame implements ActionListener {
 	 * Variables
 	 */
 	private Container container;
-
 	private String userName = "wehazanengineer@gmail.com";
 	private String password = "wehazanengineer1";
 
@@ -46,7 +49,7 @@ public class BlindAid extends JFrame implements ActionListener {
 		//Show Gui
 		this.setVisible(true);
 	}
-	
+
 	private void waitMS(long ms) {
 		try{
 			Thread.sleep(ms);
@@ -54,22 +57,29 @@ public class BlindAid extends JFrame implements ActionListener {
 			e.printStackTrace();
 		}
 	}
-	
+
 	@Override
 	public void actionPerformed(ActionEvent event) {
 		switch( event.getActionCommand()) {
 		case "Call": System.out.println("Call Pressed");
 		//Enter Phone Number to Call
-	    String phoneNumber = JOptionPane.showInputDialog(this, "Who Would you like to call?");
-
+		String phoneNumber = JOptionPane.showInputDialog(this, "Who Would you like to call?");
+		System.out.println("Number to Call: " + phoneNumber);
+		
+		ChromeOptions options = new ChromeOptions();
+		options.addArguments("--use-fake-ui-for-media-stream=true");
+		
 		//Create a new driver to control chrome
-		WebDriver driver = new ChromeDriver();
+		WebDriver driver = new ChromeDriver(options);
+		
 		//Visit Google Hangouts
 		driver.get("http://hangouts.google.com");
+
+		//New wait object 10 seconds
+		WebDriverWait wait = new WebDriverWait(driver, 10);
 		
-		if(!driver.findElements(By.id("gb_71")).isEmpty()) { //Not Empty then signed in
-			System.out.println("Already Signed In");
-		}else{
+		//Sign out button not Empty then signed in
+		if(driver.findElements(By.id("gb_71")).isEmpty()) { 
 			System.out.println("Not Signed In");
 			//Try to find signin button
 			List<WebElement> signInButton = driver.findElements(By.id("gb_70"));
@@ -81,44 +91,54 @@ public class BlindAid extends JFrame implements ActionListener {
 				driver.findElement(By.id("Email")).sendKeys(userName);
 				//Press Next
 				driver.findElement(By.id("next")).click();
-				//Wait to log in
-				this.waitMS(2000);
+
+				//Wait for password field to appear
+				WebElement passwordField = wait.until(ExpectedConditions.elementToBeClickable(By.id("Passwd")));
 				//Type Password
-				driver.findElement(By.id("Passwd")).sendKeys(password);
+				passwordField.sendKeys(this.password);
+
 				//Click Sign in
 				driver.findElement(By.id("signIn")).click();
+
 				//If first login click 4x next
 				if(!driver.findElements(By.xpath("//*[@id=\"yDmH0d\"]/div[6]/div[2]/div/div[2]/div[1]")).isEmpty()) {
 					for(int i = 0; i < 4; i++) {
 						driver.findElement(By.xpath("//*[@id=\"yDmH0d\"]/div[6]/div[2]/div/div[3]")).click();
 					}
 				}
-				//Get phone button (commented phone call is before sign in)
-				//WebElement phoneCall = driver.findElement(By.xpath("//*[@id=\"yDmH0d\"]/div[4]/div[3]/div/div/ul/li[2]/div[1]"));
-				this.waitMS(4000);
-				WebElement phoneCall = driver.findElement(By.xpath("//*[@id=\"yDmH0d\"]/div[4]/div[4]/div/div/ul/li[2]/div[1]"));
-				//Click the phone call button
-				phoneCall.click();
-				this.waitMS(4000);
-				//Get PhoneCall Field
-				WebElement phoneCallEntry = driver.findElement(By.cssSelector("placeholder=\"Name, phone number\""));
-				phoneCallEntry.sendKeys(phoneNumber);
-				//GetPhoneCall Image
-				WebElement phoneCallImage = driver.findElement(By.xpath("//*[@id=\":hr\"]/div[1]/div[2]/img"));
-				phoneCallImage.click();
-				//If there is an accept button click it
-				List<WebElement> acceptTermsCallButton = driver.findElements(By.xpath("//*[@id=\":o5.ct\"]/div/div/div/div[2]/div/button"));
-				
-				if(!acceptTermsCallButton.isEmpty()) {
-					acceptTermsCallButton.get(0).click();
-				}
-				
-				// Check the title of the page
-				//System.out.println("Page title is: " + driver.getTitle());
-				
-				//Close Driver
-				//driver.close();
 			}
+		}
+
+		this.waitMS(1000);
+		//Get phone button (commented phone call xpath is before sign in)
+		WebElement phoneCall = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//*[@id=\"yDmH0d\"]/div[4]/div[4]/div/div/ul/li[2]/div[1]")));
+
+		//Click the phone call button
+		phoneCall.click();
+
+		//Get PhoneCall Field Frame
+		WebDriver numberEntryFrame = wait.until(ExpectedConditions.frameToBeAvailableAndSwitchToIt(By.id("gtn-roster-iframe-id-b")));
+
+		//Switch To phone call frame
+		numberEntryFrame.switchTo();
+
+		//Send phone number to input field
+		WebElement numberInputField = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//*[@id=\":4.vw\"]/div/div[1]/div/div[2]/div/div[2]/div/div/div[1]/table/tbody/tr/td/input")));
+		numberInputField.sendKeys(phoneNumber);
+		//GetPhoneCall Image
+		WebElement callButton = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//*[@id=\":4.vw\"]/div/div[2]/div/div/div/div[3]/ul")));
+		callButton.click();
+		//Switch Back to main frame
+		driver.switchTo().parentFrame();
+		//Wait for chrome to ask permission to use microphone
+		this.waitMS(2000);
+		//Switch to permision prompt and accept
+		try{
+			driver.switchTo().alert().accept();
+		}catch(org.openqa.selenium.NoAlertPresentException e){
+			System.out.println("Permission already Given");
+		}catch(Exception e) {
+			System.out.println("Error while accepting microphone permission");
 		}
 		break;
 
