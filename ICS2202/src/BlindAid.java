@@ -1,19 +1,19 @@
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.KeyEvent;
 import java.util.List;
 
 public class BlindAid extends JFrame implements ActionListener {
@@ -29,7 +29,7 @@ public class BlindAid extends JFrame implements ActionListener {
 	 */
 	public BlindAid() {
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		this.setBounds(100, 100, 500, 500);
+		this.setBounds(100, 100, 400, 150);
 		container = this.getContentPane();
 		container.setLayout(new GridLayout(1,2));
 
@@ -66,11 +66,11 @@ public class BlindAid extends JFrame implements ActionListener {
 		String phoneNumber = JOptionPane.showInputDialog(this, "Who Would you like to call?");
 		System.out.println("Number to Call: " + phoneNumber);
 		
-		ChromeOptions options = new ChromeOptions();
-		options.addArguments("--use-fake-ui-for-media-stream=true");
-		
+		//ChromeOptions options = new ChromeOptions();
+		//options.addArguments("--use-fake-ui-for-media-stream=true");
 		//Create a new driver to control chrome
-		WebDriver driver = new ChromeDriver(options);
+		//WebDriver driver = new ChromeDriver(options);
+		WebDriver driver = new ChromeDriver();
 		
 		//Visit Google Hangouts
 		driver.get("http://hangouts.google.com");
@@ -134,10 +134,14 @@ public class BlindAid extends JFrame implements ActionListener {
 		this.waitMS(2000);
 		//Switch to permision prompt and accept
 		try{
-			driver.switchTo().alert().accept();
+			Robot myRobot = new Robot();
+			myRobot.keyPress(KeyEvent.VK_TAB);
+			myRobot.delay(100);
+			myRobot.keyPress(KeyEvent.VK_ENTER);
 		}catch(org.openqa.selenium.NoAlertPresentException e){
 			System.out.println("Permission already Given");
 		}catch(Exception e) {
+			e.printStackTrace();
 			System.out.println("Error while accepting microphone permission");
 		}
 		break;
