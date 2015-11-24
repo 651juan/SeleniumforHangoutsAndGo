@@ -1,11 +1,7 @@
-import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -21,10 +17,14 @@ public class BlindAid extends JFrame implements ActionListener {
 	 * Variables
 	 */
 	private Container container;
+	private JMenu FILE_MENU;
+	private String MESSAGING_PROVIDER = "Vodafone";
 	private String hangoutUserName = "wehazanengineer@gmail.com";
 	private String hangoutPassword = "wehazanengineer1";
 	private String goUsername = "";
 	private String goPassword = "";
+	private String vodafoneUsername = "";
+	private String vodafonePassword = "";
 	String phoneNumber;
 	WebDriver driver;
 
@@ -34,8 +34,19 @@ public class BlindAid extends JFrame implements ActionListener {
 	public BlindAid() {
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setBounds(100, 100, 400, 150);
+		this.setResizable(false);
 		container = this.getContentPane();
 		container.setLayout(new GridLayout(1,2));
+
+		//Create an instance of a menu Bar
+		JMenuBar menuBar = new JMenuBar();
+		//Create the menu bar menus
+		this.createFileMenu();		
+		//Add File Menu to Menu Bar
+		menuBar.add(FILE_MENU);
+		//Add the new menu bar to window
+		this.setJMenuBar(menuBar);
+
 
 		//Create Call Button and add it to GUI
 		JButton callButton = new JButton("Call");
@@ -50,12 +61,6 @@ public class BlindAid extends JFrame implements ActionListener {
 		//get the .exe chrome driver
 		System.setProperty("webdriver.chrome.driver", "ICS2202/chromedriver.exe");
 
-		//ChromeOptions options = new ChromeOptions();
-		//options.addArguments("--use-fake-ui-for-media-stream=true");
-		//Create a new driver to control chrome
-		//WebDriver driver = new ChromeDriver(options);
-		driver = new ChromeDriver();
-
 		//Show Gui
 		this.setVisible(true);
 	}
@@ -68,20 +73,42 @@ public class BlindAid extends JFrame implements ActionListener {
 		}
 	}
 
+	//MenuBar Menus
+	private void createFileMenu() {
+		JMenuItem menuItem;
+
+		FILE_MENU = new JMenu("File");
+
+		menuItem = new JMenuItem("Options");
+		menuItem.addActionListener(this);
+		FILE_MENU.add(menuItem);
+		FILE_MENU.addSeparator();
+		menuItem = new JMenuItem("Quit");
+		menuItem.addActionListener(this);
+		FILE_MENU.add(menuItem);
+	}
+
 	@Override
-	public void actionPerformed(ActionEvent event) {
+	public void actionPerformed(ActionEvent event) {		
+		//Used to wait for objects to load
+		WebDriverWait wait;
+		
 		switch( event.getActionCommand()) {
 		case "Call": System.out.println("Call Pressed");
 		//Enter Phone Number to Call
 		phoneNumber = JOptionPane.showInputDialog(this, "Who Would you like to call?");
 		System.out.println("Number to Call: " + phoneNumber);
 
+		//ChromeOptions options = new ChromeOptions();
+		//options.addArguments("--use-fake-ui-for-media-stream=true");
+		//Create a new driver to control chrome
+		//WebDriver driver = new ChromeDriver(options);
+		driver = new ChromeDriver();
 		//Visit Google Hangouts
 		driver.get("http://hangouts.google.com");
 
 		//New wait object 10 seconds
-		WebDriverWait wait = new WebDriverWait(driver, 10);
-		
+		wait = new WebDriverWait(driver, 10);
 		//Sign out button not Empty then signed in
 		if(driver.findElements(By.id("gb_71")).isEmpty()) { 
 			System.out.println("Not Signed In");
@@ -142,22 +169,27 @@ public class BlindAid extends JFrame implements ActionListener {
 			myRobot.keyPress(KeyEvent.VK_TAB);
 			myRobot.delay(100);
 			myRobot.keyPress(KeyEvent.VK_ENTER);
-		}catch(org.openqa.selenium.NoAlertPresentException e){
-			System.out.println("Permission already Given");
 		}catch(Exception e) {
 			e.printStackTrace();
 			System.out.println("Error while accepting microphone permission");
 		}
 
-			this.waitMS(5000);
-			driver.close();
-			break;
+		this.waitMS(5000);
+		driver.close();
+		break;
 
 		case "SMS": System.out.println("SMS Pressed");
-			phoneNumber = JOptionPane.showInputDialog(this, "Who Would you like to text?");
-			String message = JOptionPane.showInputDialog(this, "Enter your message");
-			System.out.println("Number to test: " + phoneNumber + "Message: " + message);
+		phoneNumber = JOptionPane.showInputDialog(this, "Who Would you like to text?");
+		String message = JOptionPane.showInputDialog(this, "Enter your message");
+		System.out.println("Number to test: " + phoneNumber + " Message: " + message);
 
+		//ChromeOptions options = new ChromeOptions();
+		//options.addArguments("--use-fake-ui-for-media-stream=true");
+		//Create a new driver to control chrome
+		//WebDriver driver = new ChromeDriver(options);
+		driver = new ChromeDriver();
+
+		if(MESSAGING_PROVIDER.equalsIgnoreCase("GO")){
 			//Visit Google Hangouts
 			driver.get("https://www.go.com.mt/personal");
 
@@ -181,11 +213,42 @@ public class BlindAid extends JFrame implements ActionListener {
 			driver.findElement(By.id("web-to-sms-form-recipients")).sendKeys(phoneNumber);
 			driver.findElement(By.id("web-to-sms-form-message")).sendKeys(message);
 			driver.findElement(By.id("web-to-sms-form-submit")).click();
+		}else if(MESSAGING_PROVIDER.equalsIgnoreCase("Vodafone")){
+			//New wait object 10 seconds
+			wait = new WebDriverWait(driver, 10);
+			
+			//Visit Vodafone
+			driver.get("https://www.vodafone.com.mt/");
+			wait.until(ExpectedConditions.elementToBeClickable(By.id("ctl00_ctl00_cphParent_ResponsiveQuickLinks_ResponsiveLogin_txtUsername_txtInput"))).sendKeys(this.vodafoneUsername);
+			wait.until(ExpectedConditions.elementToBeClickable(By.id("ctl00_ctl00_cphParent_ResponsiveQuickLinks_ResponsiveLogin_txtPassword_txtInput"))).sendKeys(this.vodafonePassword);
+			try {
+				//move mouse to corner to prevent mouseover menus from apearing
+				Robot robot = new Robot();
+				robot.mouseMove(0,0);
+			} catch (AWTException e) {
+				e.printStackTrace();
+			}
+			wait.until(ExpectedConditions.elementToBeClickable(By.id("ctl00_ctl00_cphParent_ResponsiveQuickLinks_ResponsiveLogin_btnLogin"))).click();
+			
+			this.waitMS(5000);
+			driver.get("https://www.vodafone.com.mt/web-to-sms");
 
-			this.waitMS(10000);
+			wait.until(ExpectedConditions.elementToBeClickable(By.id("ctl00_ctl00_cphParent_cphMain_ctl00_tbvOtherVodafoneNumber_txtInput"))).sendKeys(phoneNumber);
+			wait.until(ExpectedConditions.elementToBeClickable(By.id("ctl00_ctl00_cphParent_cphMain_ctl00_txtContent_txtInput"))).sendKeys(message);
+			wait.until(ExpectedConditions.elementToBeClickable(By.id("ctl00_ctl00_cphParent_cphMain_ctl00_btnSend"))).click();
+		}
 
-			driver.close();
-			break;
+		this.waitMS(10000);
+		driver.close();
+		break;
+
+		case "Options": System.out.println("Options Selected");
+		break;
+
+		case "Quit": System.out.println("Quit Selected");
+		//Quit
+		System.exit(0);
+		break;
 		}
 	}
 
