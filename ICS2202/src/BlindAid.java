@@ -21,8 +21,12 @@ public class BlindAid extends JFrame implements ActionListener {
 	 * Variables
 	 */
 	private Container container;
-	private String userName = "wehazanengineer@gmail.com";
-	private String password = "wehazanengineer1";
+	private String hangoutUserName = "wehazanengineer@gmail.com";
+	private String hangoutPassword = "wehazanengineer1";
+	private String goUsername = "";
+	private String goPassword = "";
+	String phoneNumber;
+	WebDriver driver;
 
 	/**
 	 * Create the frame.
@@ -46,6 +50,12 @@ public class BlindAid extends JFrame implements ActionListener {
 		//get the .exe chrome driver
 		System.setProperty("webdriver.chrome.driver", "ICS2202/chromedriver.exe");
 
+		//ChromeOptions options = new ChromeOptions();
+		//options.addArguments("--use-fake-ui-for-media-stream=true");
+		//Create a new driver to control chrome
+		//WebDriver driver = new ChromeDriver(options);
+		driver = new ChromeDriver();
+
 		//Show Gui
 		this.setVisible(true);
 	}
@@ -63,15 +73,9 @@ public class BlindAid extends JFrame implements ActionListener {
 		switch( event.getActionCommand()) {
 		case "Call": System.out.println("Call Pressed");
 		//Enter Phone Number to Call
-		String phoneNumber = JOptionPane.showInputDialog(this, "Who Would you like to call?");
+		phoneNumber = JOptionPane.showInputDialog(this, "Who Would you like to call?");
 		System.out.println("Number to Call: " + phoneNumber);
-		
-		//ChromeOptions options = new ChromeOptions();
-		//options.addArguments("--use-fake-ui-for-media-stream=true");
-		//Create a new driver to control chrome
-		//WebDriver driver = new ChromeDriver(options);
-		WebDriver driver = new ChromeDriver();
-		
+
 		//Visit Google Hangouts
 		driver.get("http://hangouts.google.com");
 
@@ -88,14 +92,14 @@ public class BlindAid extends JFrame implements ActionListener {
 				//click sign in button
 				signInButton.get(0).click();
 				//Type Username
-				driver.findElement(By.id("Email")).sendKeys(userName);
+				driver.findElement(By.id("Email")).sendKeys(hangoutUserName);
 				//Press Next
 				driver.findElement(By.id("next")).click();
 
 				//Wait for password field to appear
 				WebElement passwordField = wait.until(ExpectedConditions.elementToBeClickable(By.id("Passwd")));
 				//Type Password
-				passwordField.sendKeys(this.password);
+				passwordField.sendKeys(this.hangoutPassword);
 
 				//Click Sign in
 				driver.findElement(By.id("signIn")).click();
@@ -144,10 +148,44 @@ public class BlindAid extends JFrame implements ActionListener {
 			e.printStackTrace();
 			System.out.println("Error while accepting microphone permission");
 		}
-		break;
+
+			this.waitMS(5000);
+			driver.close();
+			break;
 
 		case "SMS": System.out.println("SMS Pressed");
-		break;
+			phoneNumber = JOptionPane.showInputDialog(this, "Who Would you like to text?");
+			String message = JOptionPane.showInputDialog(this, "Enter your message");
+			System.out.println("Number to test: " + phoneNumber + "Message: " + message);
+
+			//Visit Google Hangouts
+			driver.get("https://www.go.com.mt/personal");
+
+			//New wait object 10 seconds
+			this.waitMS(15000);
+
+			driver.findElement(By.className("mygo")).click();
+
+			driver.findElement(By.id("_58_login")).sendKeys(goUsername);
+			driver.findElement(By.id("_58_password")).sendKeys(goPassword);
+			this.waitMS(1000);
+			driver.findElement(By.xpath("//*[@id=\"_58_fm\"]/div/span/span/input")).click();
+
+			driver.get("https://www.go.com.mt/my-go/my-mobile/messaging");
+			this.waitMS(10000);
+
+			if(driver.findElements(By.className("ui-dialog-titlebar-close")).size() > 0) {
+				driver.findElement(By.className("ui-dialog-titlebar-close")).click();
+			}
+
+			driver.findElement(By.id("web-to-sms-form-recipients")).sendKeys(phoneNumber);
+			driver.findElement(By.id("web-to-sms-form-message")).sendKeys(message);
+			driver.findElement(By.id("web-to-sms-form-submit")).click();
+
+			this.waitMS(10000);
+
+			driver.close();
+			break;
 		}
 	}
 
