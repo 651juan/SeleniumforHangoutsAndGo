@@ -233,15 +233,18 @@ public class BlindAid extends JFrame implements ActionListener, KeyListener {
 		switch( event.getActionCommand()) {
 		case "Call": System.out.println("Call Pressed");
 		//Enter Phone Number to Call
+		freettsVoice.speak("Enter Number to call!");
 		phoneNumber = JOptionPane.showInputDialog(this, "Who Would you like to call?");
 		System.out.println("Number to Call: " + phoneNumber);
 		if(phoneNumber != null) {
+			freettsVoice.speak("Calling Please wait!");
 			this.call(phoneNumber);
 		}
 		break;
 
 		case "SMS": System.out.println("SMS Pressed");
-		phoneNumber = JOptionPane.showInputDialog(this, "Who Would you like to text?");
+			freettsVoice.speak("Enter Number to sms!");
+			phoneNumber = JOptionPane.showInputDialog(this, "Who Would you like to text?");
 		if(phoneNumber != null) {
 			this.sms(phoneNumber);
 		}
@@ -417,6 +420,7 @@ public class BlindAid extends JFrame implements ActionListener, KeyListener {
 	}
 
 	private void sms(String num) {
+		freettsVoice.speak("Enter your message you want to send!");
 		String message = JOptionPane.showInputDialog(this, "Enter your message");
 		System.out.println("Number to test: " + num + " Message: " + message);
 		//ChromeOptions options = new ChromeOptions();
