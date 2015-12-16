@@ -11,10 +11,7 @@ import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import java.awt.event.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -303,14 +300,21 @@ public class BlindAid extends JFrame implements ActionListener, KeyListener {
                         System.out.println("Tab changed to: " + sourceTabbedPane.getTitleAt(index));
                         if (sourceTabbedPane.getTitleAt(index).equalsIgnoreCase("General")) {
                             freettsVoice.speak("General Tab");
+                            freettsVoice.speak("Press ALT and C to switch to call tab");
+                            freettsVoice.speak("Press ALT and S to switch to sms tab");
                             freettsVoice.speak("Press ALT and G to chose GO as your provider");
                             freettsVoice.speak("Press ALT and V to chose Vodafone as your provider");
                         } else if (sourceTabbedPane.getTitleAt(index).equalsIgnoreCase("SMS")) {
                             freettsVoice.speak("SMS Tab");
+                            freettsVoice.speak("Press ALT and G to switch to general tab");
+                            freettsVoice.speak("Press ALT and C to switch to call tab");
+                            freettsVoice.speak("Press tab to navigate through the text fields");
 
                         } else if (sourceTabbedPane.getTitleAt(index).equalsIgnoreCase("Call")) {
                             freettsVoice.speak("Call Tab");
-
+                            freettsVoice.speak("Press ALT and G to switch to general tab");
+                            freettsVoice.speak("Press ALT and S to switch to sms tab");
+                            freettsVoice.speak("Press tab to navigate through the text fields");
                         }
                     }
                 };
@@ -324,12 +328,27 @@ public class BlindAid extends JFrame implements ActionListener, KeyListener {
                 goButton.setActionCommand("GO Mobile");
                 goButton.setMnemonic(KeyEvent.VK_G);
                 goButton.setSelected(this.goProvider);
+                goButton.addItemListener(new ItemListener() {
+                    @Override
+                    public void itemStateChanged(ItemEvent e) {
+                        if (e.getStateChange() == ItemEvent.SELECTED) {
+                            freettsVoice.speak("GO Selected as Provider");
+                        }
+                    }
+                });
 
                 JRadioButton vodafoneButton = new JRadioButton("Vodafone");
                 vodafoneButton.setActionCommand("Vodafone");
                 vodafoneButton.setMnemonic(KeyEvent.VK_V);
                 vodafoneButton.setSelected(this.vodafoneProvider);
-
+                vodafoneButton.addItemListener(new ItemListener() {
+                    @Override
+                    public void itemStateChanged(ItemEvent e) {
+                        if (e.getStateChange() == ItemEvent.SELECTED) {
+                            freettsVoice.speak("Vodafone Selected as Provider");
+                        }
+                    }
+                });
                 ButtonGroup radioGroup = new ButtonGroup();
                 radioGroup.add(goButton);
                 radioGroup.add(vodafoneButton);
@@ -348,6 +367,23 @@ public class BlindAid extends JFrame implements ActionListener, KeyListener {
                     callTab.add(callShortcutsLabel);
                     callNumBoxes[i] = new JTextField();
                     callNumBoxes[i].setText(this.callNumbers[i]);
+                    final int boxIndex = i+1;
+                    final boolean isEmpty = callNumBoxes[i].getText().equals("");
+                    final String content = callNumBoxes[i].getText();
+                    callNumBoxes[i].addFocusListener(new FocusListener() {
+                        @Override
+                        public void focusGained(FocusEvent  e) {
+                            freettsVoice.speak("Text Field " + (boxIndex) + " selected");
+                            if(isEmpty){
+                                freettsVoice.speak("Text Field Empty");
+                            }else{
+                                freettsVoice.speak("Text Field Contains " + content);
+                            }
+                        }
+
+                        @Override
+                        public void focusLost(FocusEvent e) {}
+                    });
                     callTab.add(callNumBoxes[i]);
                 }
 
@@ -361,18 +397,38 @@ public class BlindAid extends JFrame implements ActionListener, KeyListener {
                     smsTab.add(callShortcutsLabel);
                     smsNumBoxes[i] = new JTextField();
                     smsNumBoxes[i].setText(this.smsNumbers[i]);
+                    final int boxIndex = i+1;
+                    final boolean isEmpty = smsNumBoxes[i].getText().equals("");
+                    final String content = smsNumBoxes[i].getText();
+                    smsNumBoxes[i].addFocusListener(new FocusListener() {
+                        @Override
+                        public void focusGained(FocusEvent  e) {
+                           freettsVoice.speak("Text Field " + (boxIndex) + " selected");
+                            if(isEmpty){
+                                freettsVoice.speak("Text Field Empty");
+                            }else{
+                                freettsVoice.speak("Text Field Contains " + content);
+                            }
+                        }
+
+                        @Override
+                        public void focusLost(FocusEvent e) {}
+                    });
                     smsTab.add(smsNumBoxes[i]);
                 }
                 tabContainer.add("General", generalTab);
+                tabContainer.setMnemonicAt(0, KeyEvent.VK_G);
                 tabContainer.add("Call", callTab);
+                tabContainer.setMnemonicAt(1, KeyEvent.VK_C);
                 tabContainer.add("SMS", smsTab);
+                tabContainer.setMnemonicAt(2, KeyEvent.VK_S);
                 myPanel.add(tabContainer);
 
 
                 int optionResult = JOptionPane.showConfirmDialog(this, myPanel, "Settings", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 
                 if (optionResult == JOptionPane.OK_OPTION) {
-
+                    freettsVoice.speak("OK Pressed Settings Saved");
                     try {
                         for (int i = 0; i < 9; i++) {
                             this.callNumbers[i] = callNumBoxes[i].getText();
@@ -392,11 +448,14 @@ public class BlindAid extends JFrame implements ActionListener, KeyListener {
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
+                }else{
+                    freettsVoice.speak("Cancel Pressed Settings Discarded");
                 }
                 break;
 
             case "Quit":
                 System.out.println("Quit Selected");
+                freettsVoice.speak("Closing the Program.");
                 //Quit
                 System.exit(0);
                 break;
