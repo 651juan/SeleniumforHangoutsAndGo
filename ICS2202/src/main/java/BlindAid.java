@@ -555,19 +555,15 @@ public class BlindAid extends JFrame implements ActionListener, KeyListener {
         driver = new ChromeDriver();
 
         if (MESSAGING_PROVIDER.equalsIgnoreCase("GO")) {
-            //Visit Google Hangouts
+            //Visit Go
             driver.get("https://www.go.com.mt/personal");
 
             //New wait object 10 seconds
             this.waitMS(15000);
 
             driver.findElement(By.className("mygo")).click();
-
             driver.findElement(By.id("_58_login")).sendKeys(goUsername);
-            driver.findElement(By.id("_58_password")).sendKeys(goPassword);
-            this.waitMS(1000);
-            driver.findElement(By.id("aui_3_4_0_1_554")).click();
-            //driver.findElement(By.xpath("//*[@id=\"_58_fm\"]/div/span/span/input")).click();
+            driver.findElement(By.id("_58_password")).sendKeys(goPassword+"\n");
             this.waitMS(2000);
 
             driver.get("https://www.go.com.mt/my-go/my-mobile/messaging");
