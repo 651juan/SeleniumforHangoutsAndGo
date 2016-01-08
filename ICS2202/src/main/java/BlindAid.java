@@ -41,8 +41,8 @@ public class BlindAid extends JFrame implements ActionListener, KeyListener {
     private String MESSAGING_PROVIDER = "GO";
     private String hangoutUserName = "wehazanengineer@gmail.com";
     private String hangoutPassword = "wehazanengineer1";
-    private String goUsername = "";
-    private String goPassword = "";
+    private String goUsername = "juan651";
+    private String goPassword = "juanitos,,96";
     private String vodafoneUsername = "";
     private String vodafonePassword = "";
 
@@ -285,6 +285,7 @@ public class BlindAid extends JFrame implements ActionListener, KeyListener {
                 if (phoneNumber != null) {
                     this.sms(phoneNumber);
                 }
+                freettsVoice.speak("SMS Sent.");
                 break;
 
             case "Options":
@@ -539,6 +540,7 @@ public class BlindAid extends JFrame implements ActionListener, KeyListener {
         }
 
         this.waitMS(5000);
+        freettsVoice.speak("Call Endeds!");
         driver.close();
     }
 
@@ -564,7 +566,9 @@ public class BlindAid extends JFrame implements ActionListener, KeyListener {
             driver.findElement(By.id("_58_login")).sendKeys(goUsername);
             driver.findElement(By.id("_58_password")).sendKeys(goPassword);
             this.waitMS(1000);
-            driver.findElement(By.xpath("//*[@id=\"_58_fm\"]/div/span/span/input")).click();
+            driver.findElement(By.id("aui_3_4_0_1_554")).click();
+            //driver.findElement(By.xpath("//*[@id=\"_58_fm\"]/div/span/span/input")).click();
+            this.waitMS(2000);
 
             driver.get("https://www.go.com.mt/my-go/my-mobile/messaging");
             this.waitMS(10000);
